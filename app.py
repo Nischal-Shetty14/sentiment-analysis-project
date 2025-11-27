@@ -136,5 +136,6 @@ def api_predict():
     return jsonify({"probs": probs})
 
 if __name__ == "__main__":
-    # debug mode for development only
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
+
