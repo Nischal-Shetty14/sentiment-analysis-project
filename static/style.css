@@ -1,0 +1,203 @@
+/* ---------- GLOBAL LAYOUT ---------- */
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #d9e4f5, #f1f5ff);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* ---------- HEADER ---------- */
+
+.app-header {
+    width: 100%;
+    padding: 20px 0;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(8px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.app-header h2 {
+    margin: 0;
+    color: #2b4c7e;
+    font-size: 26px;
+    font-weight: 600;
+}
+
+/* ---------- MAIN CONTAINER ---------- */
+
+.container {
+    width: 90%;
+    max-width: 900px;
+    margin-top: 30px;
+}
+
+/* ---------- GENERIC CARD ---------- */
+
+.card {
+    background: rgba(255, 255, 255, 0.6);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    backdrop-filter: blur(8px);
+    margin-bottom: 20px;
+}
+
+/* ---------- TEXTAREA ---------- */
+
+textarea {
+    width: 100%;
+    min-height: 130px;
+    padding: 15px;
+    border-radius: 10px;
+    border: 2px solid #cdd6e5;
+    font-size: 16px;
+    resize: none;
+    outline: none;
+    background: white;
+    transition: 0.2s ease;
+}
+
+textarea:focus {
+    border-color: #5a8dee;
+    box-shadow: 0 0 5px rgba(90, 141, 238, 0.5);
+}
+
+/* ---------- BUTTONS ---------- */
+
+.button-row {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn {
+    padding: 10px 22px;
+    font-size: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s ease-in-out;
+    font-weight: 600;
+}
+
+.analyze-btn {
+    background: #5a8dee;
+    color: white;
+}
+
+.analyze-btn:hover {
+    background: #3d6dde;
+}
+
+.clear-btn {
+    background: white;
+    color: #5a5a5a;
+    border: 2px solid #bfc7d8;
+}
+
+.clear-btn:hover {
+    background: #f0f2f7;
+}
+
+/* ---------- LOADING SPINNER ---------- */
+
+.loading-spinner {
+    margin-top: 10px;
+    width: 30px;
+    height: 30px;
+    border: 4px solid #d5d9e2;
+    border-top-color: #5a8dee;
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---------- RESULT CARD ---------- */
+
+.result-card {
+    padding: 20px;
+    border-radius: 14px;
+    margin-top: 20px;
+    color: white;
+}
+
+.result-card.positive {
+    background: #4CAF50;
+}
+
+.result-card.negative {
+    background: #E53935;
+}
+
+.result-card.neutral {
+    background: #757575;
+}
+
+.prob-box ul {
+    padding-left: 15px;
+    margin-top: 10px;
+}
+
+/* ---------- CHART CONTAINERS ---------- */
+
+.chart-container {
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(10px);
+    padding: 20px;
+    border-radius: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    margin-top: 25px;
+}
+
+.chart-container h3 {
+    margin-bottom: 15px;
+    text-align: center;
+    color: #2b4c7e;
+    font-weight: 600;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 600px) {
+    .button-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn {
+        width: 100%;
+    }
+}
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+#pieChart {
+    max-width: 300px;
+    max-height: 300px;
+    margin: 0 auto;
+}
+.total-data {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 17px;
+    font-weight: 600;
+    color: #2b4c7e;
+}
+
+

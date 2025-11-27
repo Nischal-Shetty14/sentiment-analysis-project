@@ -1,0 +1,156 @@
+<!-- @ts-nocheck -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Analyzer</title>
+    <link rel="stylesheet" href="/static/style.css"/>
+</head>
+<body>
+
+    <!-- App Name -->
+    <header class="app-header">
+        <h2>🧠 City Sentiment Analyzer</h2>
+    </header>
+
+    <div class="container">
+
+        <div class="card">
+            <form id="analyzeForm" method="POST">
+                <textarea id="inputText" name="user_text" placeholder="Type your text here..." required>{{ text }}</textarea>
+
+                <div class="button-row">
+                    <button type="submit" class="btn analyze-btn">Analyze</button>
+                    <button type="button" class="btn clear-btn" id="clearBtn">Clear</button>
+                </div>
+
+                <!-- Loading spinner -->
+                <div id="loading" class="loading-spinner" style="display:none;"></div>
+            </form>
+        </div>
+
+        {% if result %}
+        <div class="result-card 
+            {% if 'positive' in result|lower %}positive
+            {% elif 'negative' in result|lower %}negative
+            {% else %}neutral{% endif %}">
+            <h3>Result: {{ result }}</h3>
+
+            {% if probs %}
+            <div class="prob-box">
+                <h4>Class Probabilities:</h4>
+                <ul>
+                    {% for cls, p in probs %}
+                        <li><strong>{{ cls }}</strong>: {{ (p * 100) | round(2) }}%</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+
+        <!-- PIE chart container -->
+        {% if probs %}
+        <div class="chart-container">
+            <h3>Prediction Probability Breakdown</h3>
+            <canvas id="pieChart"></canvas>
+        </div>
+        {% endif %}
+
+        <!-- BAR chart container -->
+        <div class="chart-container">
+            <h3>Dataset Category Distribution</h3>
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="total-data">
+    Total Data Entries: <strong>{{ category_counts.values() | sum }}</strong>
+</div>
+
+
+    </div>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <!-- PIE Chart Script (inside Jinja block so VS Code doesn't complain) -->
+    {% if probs %}
+<script>
+    const pieLabels = JSON.parse('{{ probs | map(attribute=0) | list | tojson | safe }}');
+    const pieValues = JSON.parse('{{ probs | map(attribute=1) | list | tojson | safe }}');
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
+        data: {
+            labels: pieLabels,
+            datasets: [{
+                data: pieValues,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let v = context.raw;
+                            return context.label + ": " + Math.round(v * 100) + "%";
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endif %}
+
+
+    <!-- BAR Chart Script -->
+    <script>
+        const barLabels = JSON.parse('{{ category_counts.keys() | list | tojson | safe }}');
+        const barValues = JSON.parse('{{ category_counts.values() | list | tojson | safe }}');
+
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: barLabels,
+                datasets: [{
+                    label: 'Dataset Entries',
+                    data: barValues,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+
+
+    <!-- CLEAR / LOADING / ENTER SUBMIT -->
+    <script>
+        const form = document.getElementById("analyzeForm");
+        const loading = document.getElementById("loading");
+
+        form.addEventListener("submit", () => {
+            loading.style.display = "block";
+        });
+
+        document.getElementById("clearBtn").addEventListener("click", () => {
+            document.getElementById("inputText").value = "";
+            loading.style.display = "none";
+        });
+
+        document.getElementById("inputText").addEventListener("keydown", (e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    </script>
+
+</body>
+</html>
