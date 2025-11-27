@@ -40,6 +40,16 @@ def clean_text(text):
     text = re.sub(r"[^a-z0-9\s]", " ", text)
     text = " ".join(text.split())
     return text
+def apply_but_rule(text):
+    """
+    Handles contrastive sentences of the form:
+    X but Y  →  return Y (dominant sentiment)
+    """
+    parts = text.split(" but ")
+    if len(parts) > 1:
+        return parts[-1].strip()  # take clause after last 'but'
+    return text
+
 
 # --- Category Detection for Dataset Charts ---
 df_full = pd.read_csv(DATA_PATH)
@@ -80,6 +90,7 @@ def index():
     if request.method == "POST":
         input_text = request.form.get("user_text", "")
         cleaned = clean_text(input_text)
+        cleaned = apply_but_rule(cleaned)
         vec = vectorizer.transform([cleaned])
         proba = model.predict_proba(vec)[0]  # order corresponds to model.classes_
         classes = model.classes_
@@ -116,6 +127,7 @@ def api_predict():
     data = request.get_json() or {}
     text = data.get("text","")
     cleaned = clean_text(text)
+    cleaned = apply_but_rule(cleaned)
     vec = vectorizer.transform([cleaned])
     proba = model.predict_proba(vec)[0]
     classes = model.classes_.tolist()
