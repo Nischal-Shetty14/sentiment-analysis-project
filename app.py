@@ -5,7 +5,7 @@ import pandas as pd
 import nltk
 from nltk.corpus import stopwords
 
-nltk.download("stopwords")
+
 
 ROOT = os.path.dirname(__file__) or "."
 MODEL_PATH = os.path.join(ROOT, "model.pkl")
