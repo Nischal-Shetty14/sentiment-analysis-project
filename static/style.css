@@ -201,3 +201,43 @@ textarea {
 }
 
 
+/* ---------- ADMIN TOP BAR ---------- */
+
+.top-bar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px;
+    background: #eaeaea;
+}
+
+.admin-btn {
+    padding: 8px 15px;
+    background: black;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+/* ---------- ADMIN TABLE ---------- */
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+td, th {
+    border: 1px solid #ccc;
+    padding: 8px;
+}
+
+th {
+    background: #ddd;
+}
+#barChart {
+    max-width: 500px;
+    height: 300px !important;
+    margin: 0 auto;
+}
+

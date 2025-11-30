@@ -8,6 +8,12 @@
 </head>
 <body>
 
+    <!-- TOP BAR WITH ADMIN BUTTON (ADDED) -->
+    <div class="top-bar">
+        <a href="/login" class="admin-btn" target="_blank">Admin Login</a>
+
+    </div>
+
     <!-- App Name -->
     <header class="app-header">
         <h2>🧠 City Sentiment Analyzer</h2>
@@ -64,9 +70,8 @@
             <canvas id="barChart"></canvas>
         </div>
         <div class="total-data">
-    Total Data Entries: <strong>{{ category_counts.values() | sum }}</strong>
-</div>
-
+            Total Data Entries: <strong>{{ category_counts.values() | sum }}</strong>
+        </div>
 
     </div>
 
@@ -74,7 +79,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 
-    <!-- PIE Chart Script (inside Jinja block so VS Code doesn't complain) -->
+    <!-- PIE Chart Script -->
     {% if probs %}
 <script>
     const pieLabels = JSON.parse('{{ probs | map(attribute=0) | list | tojson | safe }}');

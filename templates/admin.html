@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="/logout" class="admin-btn">Logout</a>
+</div>
+
+<h2 style="text-align:center;">📊 Admin Dashboard</h2>
+
+<!-- Chart Container -->
+<div class="chart-container" style="max-width:500px; margin:20px auto;">
+    <canvas id="sentimentChart"></canvas>
+</div>
+
+<h3 style="text-align:center;">📝 Feedback Table</h3>
+
+<table id="dataTable" style="width:95%; margin:auto;"></table>
+
+<script>
+async function loadData() {
+    const res = await fetch("/admin-data");
+    const data = await res.json();
+
+    // ====== BUILD TABLE ======
+    let html = `
+        <tr>
+            <th>Feedback</th>
+            <th>Analysis</th>
+            <th>Positive</th>
+            <th>Negative</th>
+            <th>Neutral</th>
+        </tr>
+    `;
+
+    data.forEach(r => {
+        html += `
+        <tr>
+            <td>${r.feedback ?? ""}</td>
+            <td>${r.analysis ?? ""}</td>
+            <td>${r.positive ?? ""}</td>
+            <td>${r.negative ?? ""}</td>
+            <td>${r.neutral ?? ""}</td>
+        </tr>`;
+    });
+
+    document.getElementById("dataTable").innerHTML = html;
+
+    // ====== SENTIMENT COUNTS (NOT sums) ======
+    let pos = 0, neg = 0, neu = 0;
+
+    data.forEach(r => {
+        const sentiment = String(r.analysis ?? "").toLowerCase();
+
+        if (sentiment === "positive") pos++;
+        else if (sentiment === "negative") neg++;
+        else neu++; // exactly matches undefined/missing → neutral
+    });
+
+    // ====== DRAW SMALL CHART ======
+    new Chart(document.getElementById("sentimentChart"), {
+        type: "bar",
+        data: {
+            labels: ["Positive", "Negative", "Neutral"],
+            datasets: [{
+                label: "Sentiment Count",
+                data: [pos, neg, neu],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+}
+
+loadData();
+</script>
+
+</body>
+</html>

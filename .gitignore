@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.pyc
+
+# Keys & credentials
+credentials.json
+*.json
+.env
+
+# Virtual environment
+venv/
+env/
+
+# OS files
+.DS_Store

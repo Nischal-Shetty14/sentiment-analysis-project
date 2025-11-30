@@ -5,6 +5,9 @@ import pandas as pd
 import nltk
 from nltk.corpus import stopwords
 
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
+import gspread
+from google.oauth2.service_account import Credentials
 
 
 ROOT = os.path.dirname(__file__) or "."
@@ -13,10 +16,25 @@ VECT_PATH = os.path.join(ROOT, "vectorizer.pkl")
 DATA_PATH = os.path.join(ROOT, "dataset.csv")
 
 app = Flask(__name__)
+app.secret_key = "super-secret-key-123"
+
 
 # load model & vect
 model = joblib.load(MODEL_PATH)
 vectorizer = joblib.load(VECT_PATH)
+# ===== GOOGLE SHEETS SETUP =====
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive.readonly"
+]
+
+
+creds = Credentials.from_service_account_file("credentials.json", scopes=SCOPES)
+gs_client = gspread.authorize(creds)
+
+SHEET_NAME = "SentimentFeedback"  # your sheet name
+sheet = gs_client.open(SHEET_NAME).sheet1
+
 
 # prep stopwords - keep not/no
 stop = set(stopwords.words("english"))
@@ -79,6 +97,57 @@ raw_counts = df_full["category"].value_counts().to_dict()
 
 CATEGORY_COUNTS = {cat: raw_counts.get(cat, 0) for cat in CATEGORY_ORDER}
 
+def admin_required(f):
+    def wrapper(*args, **kwargs):
+        if session.get("is_admin") != True:
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    wrapper.__name__ = f.__name__
+    return wrapper
+
+@app.route("/user")
+def user_page():
+    return render_template("user.html")
+
+
+
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        username = request.form.get("username")
+        password = request.form.get("password")
+
+        if username == "admin" and password == "abc":
+            session["is_admin"] = True
+            return redirect(url_for("admin_page"))
+        else:
+            return render_template("login.html", error="Invalid username or password")
+
+    return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
+
+@app.route("/admin")
+@admin_required
+def admin_page():
+    return render_template("admin.html")
+
+@app.route("/admin-data")
+@admin_required
+def admin_data():
+    try:
+        records = sheet.get_all_records()
+        return jsonify(records)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+
+
+
 
 
 
@@ -99,11 +168,42 @@ def index():
         probs = sorted(probs, key=lambda x: x[1], reverse=True)
         prediction = probs[0][0]
         confidence = probs[0][1]
-        # If confidence low, we can show 'Uncertain' (threshold 0.5)
+
+        # --- extract probabilities safely for a 3-class model ---
+        proba_positive = 0.0
+        proba_negative = 0.0
+        proba_neutral = 0.0
+
+        for cls, p in probs:
+            label = str(cls).lower().strip()
+            if label == "positive":
+                proba_positive = float(p)
+            elif label == "negative":
+                proba_negative = float(p)
+            elif label == "neutral":
+                proba_neutral = float(p)
+
+        # --- append to Google Sheet (ensure your sheet header is:
+        # feedback | analysis | positive | negative | neutral ) ---
+        try:
+            sheet.append_row([
+                input_text,
+                str(prediction),
+                round(proba_positive, 4),
+                round(proba_negative, 4),
+                round(proba_neutral, 4)
+            ])
+        except Exception as e:
+            # don't crash — just log
+            print("Error writing to sheet:", e)
+
+        # prepare displayed result text
         if confidence < 0.5:
             result = f"Uncertain — best guess: {prediction} ({confidence:.2f})"
         else:
             result = f"{prediction} ({confidence:.2f})"
+
+    # render page for both GET and POST
     return render_template(
         "index.html",
         result=result,
@@ -111,6 +211,7 @@ def index():
         text=input_text,
         category_counts=CATEGORY_COUNTS
     )
+
 
 @app.route("/dashboard")
 def dashboard():
