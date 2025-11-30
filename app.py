@@ -2,8 +2,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 import joblib, os, re
 import pandas as pd
-import nltk
-from nltk.corpus import stopwords
+
 
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 import gspread
@@ -16,7 +15,8 @@ VECT_PATH = os.path.join(ROOT, "vectorizer.pkl")
 DATA_PATH = os.path.join(ROOT, "dataset.csv")
 
 app = Flask(__name__)
-app.secret_key = "super-secret-key-123"
+app.secret_key = os.getenv("SECRET_KEY", "dev-secret-key")
+
 
 
 # load model & vect
@@ -36,9 +36,6 @@ SHEET_NAME = "SentimentFeedback"  # your sheet name
 sheet = gs_client.open(SHEET_NAME).sheet1
 
 
-# prep stopwords - keep not/no
-stop = set(stopwords.words("english"))
-stop.discard("not"); stop.discard("no")
 
 def expand_contractions(text):
     mapping = {
